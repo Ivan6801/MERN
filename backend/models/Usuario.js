@@ -1,22 +1,24 @@
 import mongoose from "mongoose";
 
+mongoose.set("strictQuery", true);
+
 const usuarioSchema = mongoose.Schema(
   {
     nombre: {
       type: String,
-      required: True,
+      require: true,
       trim: true,
     },
     password: {
       type: String,
-      required: True,
+      require: true,
       trim: true,
     },
     email: {
       type: String,
-      required: True,
+      require: true,
       trim: true,
-      unique: True,
+      unique: true,
     },
     token: {
       type: String,
