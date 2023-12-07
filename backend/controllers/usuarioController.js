@@ -1,4 +1,4 @@
-import Usuarios from "../models/Usuario.js";
+import Usuario from "../models/Usuario.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 
@@ -6,7 +6,7 @@ const registrar = async (req, res) => {
   // Evitar registros duplicados
 
   const { email } = req.body;
-  const existeUsuario = await Usuarios.findOne({ email });
+  const existeUsuario = await Usuario.findOne({ email });
 
   if (existeUsuario) {
     const error = new Error("Usuario ya registrado");
@@ -14,7 +14,7 @@ const registrar = async (req, res) => {
   }
 
   try {
-    const usuario = new Usuarios(req.body);
+    const usuario = new Usuario(req.body);
     usuario.token = generarId();
     const usuarioAlmacenado = await usuario.save();
     res.json(usuarioAlmacenado);
@@ -27,7 +27,7 @@ const autenticar = async (req, res) => {
   const { email, password } = req.body;
 
   // Comprobar si el usuario existe
-  const usuario = await Usuarios.findOne({ email });
+  const usuario = await Usuario.findOne({ email });
 
   if (!usuario) {
     const error = new Error("El usuario no existe");
@@ -53,4 +53,22 @@ const autenticar = async (req, res) => {
   }
 };
 
-export { registrar, autenticar };
+const confirmar = async (req, res) => {
+  const { token } = req.params;
+  const usuarioConfirmar = await Usuario.findOne({ token });
+  if (!usuarioConfirmar) {
+    const error = new Error("Token no válido");
+    return res.status(403).json({ msg: error.message });
+  }
+
+  try {
+    usuarioConfirmar.confirmado = true;
+    usuarioConfirmar.token = "";
+    await usuarioConfirmar.save();
+    res.json({ msg: "Usuario Confirmado Correctamente" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export { registrar, autenticar, confirmar };
