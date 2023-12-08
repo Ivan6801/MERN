@@ -84,7 +84,6 @@ const olvidePassword = async (req, res) => {
     usuario.token = generarId();
     await usuario.save();
     res.json({ msg: "Hemos enviado un email con las instrucciones" });
-    console.log(usuario);
   } catch (error) {
     console.log(error);
   }
@@ -92,14 +91,44 @@ const olvidePassword = async (req, res) => {
 
 const comprobarToken = async (req, res) => {
   const { token } = req.params;
+
   const tokenValido = await Usuario.findOne({ token });
 
   if (tokenValido) {
     res.json({ msg: "Token válido y el Usuario existe" });
   } else {
-    const error = new Error("El usuario no existe");
+    const error = new Error("Token no válido");
     return res.status(404).json({ msg: error.message });
   }
 };
 
-export { registrar, autenticar, confirmar, olvidePassword, comprobarToken };
+const nuevoPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const usuario = await Usuario.findOne({ token });
+
+  if (usuario) {
+    usuario.password = password;
+    usuario.token = "";
+    try {
+      await usuario.save();
+      console.log(usuario);
+      res.json({ msg: "Password Modificado Correctamente" });
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    const error = new Error("Token no válido");
+    return res.status(404).json({ msg: error.message });
+  }
+};
+
+export {
+  registrar,
+  autenticar,
+  confirmar,
+  olvidePassword,
+  comprobarToken,
+  nuevoPassword,
+};
