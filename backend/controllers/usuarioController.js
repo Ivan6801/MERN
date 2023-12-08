@@ -113,7 +113,6 @@ const nuevoPassword = async (req, res) => {
     usuario.token = "";
     try {
       await usuario.save();
-      console.log(usuario);
       res.json({ msg: "Password Modificado Correctamente" });
     } catch (error) {
       console.log(error);
@@ -124,6 +123,12 @@ const nuevoPassword = async (req, res) => {
   }
 };
 
+const perfil = async (req, res) => {
+  const { usuario } = req;
+
+  res.json(usuario);
+};
+
 export {
   registrar,
   autenticar,
@@ -131,4 +136,5 @@ export {
   olvidePassword,
   comprobarToken,
   nuevoPassword,
+  perfil,
 };
