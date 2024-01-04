@@ -25,7 +25,13 @@ const proyectosSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",
     },
-    colaborradores: [
+    tareas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tarea",
+      },
+    ],
+    colaboradores: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Usuario",
@@ -36,6 +42,5 @@ const proyectosSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-
 const Proyecto = mongoose.model("Proyecto", proyectosSchema);
 export default Proyecto;
