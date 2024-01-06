@@ -40,6 +40,30 @@ export function Registrar() {
     setAlerta({});
 
     // Crear el usuario en la API
+
+    try {
+      const { data } = await clienteAxios.post(`/usuarios`, {
+        nombre,
+        email,
+        password,
+      });
+      console.log(data);
+
+      setAlerta({
+        msg: data.msg,
+        error: false,
+      });
+
+      setNombre("");
+      setEmail("");
+      setPassword("");
+      setRepetirPassword("");
+    } catch (error) {
+      setAlerta({
+        msg: error.response.data.msg,
+        error: true,
+      });
+    }
   };
 
   const { msg } = alerta;
