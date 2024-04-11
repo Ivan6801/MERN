@@ -11,7 +11,25 @@ dotenv.config();
 conectarDB();
 
 // Configurar CORS
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_LOCALHOST,
+].map((origin) => origin.replace(/\/$/, ""));
+
+const corsOptions = {
+  origin: function (incomingOrigin, callback) {
+    const normalizedIncomingOrigin = incomingOrigin.replace(/\/$/, "");
+    if (
+      !normalizedIncomingOrigin ||
+      allowedOrigins.includes(normalizedIncomingOrigin)
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
