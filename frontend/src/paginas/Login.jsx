@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import clienteAxios from "../config/clienteAxios";
+import { Alerta } from "../components/Alerta";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [alerta, setAlerta] = useState({});
 
   const navigate = useNavigate();
 
@@ -16,13 +18,19 @@ export function Login() {
         email,
         password,
       });
+      setAlerta({});
       localStorage.setItem("token", data.token);
       console.log(data);
       navigate("/proyectos");
     } catch (error) {
-      console.error(error);
+      setAlerta({
+        msg: error.response.data.msg,
+        error: true,
+      });
     }
   };
+
+  const { msg } = alerta;
 
   return (
     <>
@@ -30,6 +38,8 @@ export function Login() {
         Inicia sesión y administra tus {""}
         <span className="text-slate-700">Proyecto</span>
       </h1>
+
+      {msg && <Alerta alerta={alerta} />}
 
       <form
         className="my-10 bg-white shadow rounded-lg p-10"

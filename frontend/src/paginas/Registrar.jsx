@@ -46,12 +46,18 @@ export function Registrar() {
         nombre,
         email,
         password,
+        confirmado: true,
       });
       console.log(data);
 
       setAlerta({
         msg: data.msg,
         error: false,
+      });
+
+      setAlerta({
+        msg: "Se ha creado tu usuario",
+        success: true,
       });
 
       setNombre("");
@@ -74,6 +80,7 @@ export function Registrar() {
         Crea tu Cuenta y Administra tus {""}
         <span className="text-slate-700">proyectos</span>
       </h1>
+
       {msg && <Alerta alerta={alerta} />}
 
       <form
