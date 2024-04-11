@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
+import PropTypes from "prop-types";
+
 const Alerta = ({ alerta }) => {
-  console.log(alerta);
   return (
     <div
       className={` ${alerta.success && "from-green-400 to-green-600"} ${
@@ -10,6 +10,10 @@ const Alerta = ({ alerta }) => {
       {alerta.msg}
     </div>
   );
+};
+
+Alerta.propTypes = {
+  alerta: PropTypes.object.isRequired,
 };
 
 export { Alerta };
