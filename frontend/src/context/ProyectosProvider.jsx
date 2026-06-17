@@ -198,8 +198,9 @@ const ProyectosProvider = ({ children }) => {
   };
 
   const handleModalTarea = () => {
-    setModalFormularioTarea(!modalFormularioTarea);
+    setModalFormularioTarea((modalAbierto) => !modalAbierto);
     setTarea({});
+    setAlerta({});
   };
 
   const submitTarea = async (tarea) => {
@@ -226,9 +227,14 @@ const ProyectosProvider = ({ children }) => {
 
       setAlerta({});
       setModalFormularioTarea(false);
+      setTarea({});
+      setProyecto((proyectoActual) => ({
+        ...proyectoActual,
+        tareas: [...(proyectoActual.tareas || []), data],
+      }));
 
       // SOCKET IO
-      socket.emit("nueva tarea", data);
+      socket?.emit("nueva tarea", data);
     } catch (error) {
       console.log(error);
     }
@@ -254,9 +260,16 @@ const ProyectosProvider = ({ children }) => {
 
       setAlerta({});
       setModalFormularioTarea(false);
+      setTarea({});
+      setProyecto((proyectoActual) => ({
+        ...proyectoActual,
+        tareas: (proyectoActual.tareas || []).map((tareaState) =>
+          tareaState._id === data._id ? data : tareaState,
+        ),
+      }));
 
       // SOCKET
-      socket.emit("actualizar tarea", data);
+      socket?.emit("actualizar tarea", data);
     } catch (error) {
       console.log(error);
     }
@@ -269,7 +282,8 @@ const ProyectosProvider = ({ children }) => {
 
   const handleModalEliminarTarea = (tarea) => {
     setTarea(tarea);
-    setModalEliminarTarea(!modalEliminarTarea);
+    setModalEliminarTarea((modalAbierto) => !modalAbierto);
+    setAlerta({});
   };
 
   const eliminarTarea = async () => {
@@ -294,9 +308,15 @@ const ProyectosProvider = ({ children }) => {
       });
 
       setModalEliminarTarea(false);
+      setProyecto((proyectoActual) => ({
+        ...proyectoActual,
+        tareas: (proyectoActual.tareas || []).filter(
+          (tareaState) => tareaState._id !== tarea._id,
+        ),
+      }));
 
       // SOCKET
-      socket.emit("eliminar tarea", tarea);
+      socket?.emit("eliminar tarea", tarea);
 
       setTarea({});
       setTimeout(() => {
@@ -435,47 +455,62 @@ const ProyectosProvider = ({ children }) => {
       );
       setTarea({});
       setAlerta({});
+      setProyecto((proyectoActual) => ({
+        ...proyectoActual,
+        tareas: (proyectoActual.tareas || []).map((tareaState) =>
+          tareaState._id === data._id ? data : tareaState,
+        ),
+      }));
 
       // socket
-      socket.emit("cambiar estado", data);
+      socket?.emit("cambiar estado", data);
     } catch (error) {
       console.log(error.response);
     }
   };
 
   const handleBuscador = () => {
-    setBuscador(!buscador);
+    setBuscador((buscadorAbierto) => !buscadorAbierto);
   };
 
   // Socket io
   const submitTareasProyecto = (tarea) => {
-    const proyectoActualizado = { ...proyecto };
-    proyectoActualizado.tareas = [...proyectoActualizado.tareas, tarea];
-    setProyecto(proyectoActualizado);
+    setProyecto((proyectoActual) => {
+      const tareas = proyectoActual.tareas || [];
+      const tareaExiste = tareas.some((tareaState) => tareaState._id === tarea._id);
+
+      if (tareaExiste) return proyectoActual;
+
+      return {
+        ...proyectoActual,
+        tareas: [...tareas, tarea],
+      };
+    });
   };
   const eliminarTareaProyecto = (tarea) => {
-    console.log(tarea);
-    const proyectoActualizado = { ...proyecto };
-    proyectoActualizado.tareas = proyectoActualizado.tareas.filter(
-      (tareaState) => tareaState._id !== tarea._id,
-    );
-    console.log(proyectoActualizado);
-    setProyecto(proyectoActualizado);
+    setProyecto((proyectoActual) => ({
+      ...proyectoActual,
+      tareas: (proyectoActual.tareas || []).filter(
+        (tareaState) => tareaState._id !== tarea._id,
+      ),
+    }));
   };
 
   const actualizarTareaProyecto = (tarea) => {
-    const proyectoActualizado = { ...proyecto };
-    proyectoActualizado.tareas = proyectoActualizado.tareas.map((tareaState) =>
-      tareaState._id === tarea._id ? tarea : tareaState,
-    );
-    setProyecto(proyectoActualizado);
+    setProyecto((proyectoActual) => ({
+      ...proyectoActual,
+      tareas: (proyectoActual.tareas || []).map((tareaState) =>
+        tareaState._id === tarea._id ? tarea : tareaState,
+      ),
+    }));
   };
   const cambiarEstadoTarea = (tarea) => {
-    const proyectoActualizado = { ...proyecto };
-    proyectoActualizado.tareas = proyectoActualizado.tareas.map((tareaState) =>
-      tareaState._id === tarea._id ? tarea : tareaState,
-    );
-    setProyecto(proyectoActualizado);
+    setProyecto((proyectoActual) => ({
+      ...proyectoActual,
+      tareas: (proyectoActual.tareas || []).map((tareaState) =>
+        tareaState._id === tarea._id ? tarea : tareaState,
+      ),
+    }));
   };
 
   const cerrarSesionProyectos = () => {

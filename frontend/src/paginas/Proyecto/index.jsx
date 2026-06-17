@@ -6,7 +6,6 @@ import ModalFormularioTarea from "../../components/ModalFormularioTarea";
 import ModalEliminarTarea from "../../components/ModalEliminarTarea";
 import ModalEliminarColaborador from "../../components/ModalEliminarColaborador";
 import Tarea from "../../components/Tarea";
-import { Alerta } from "../../components/Alerta";
 import Colaborador from "../../components/Colaborador";
 import io from "socket.io-client";
 
@@ -19,7 +18,6 @@ export default function Proyecto() {
     proyecto,
     cargando,
     handleModalTarea,
-    alerta,
     submitTareasProyecto,
     eliminarTareaProyecto,
     actualizarTareaProyecto,
@@ -30,14 +28,20 @@ export default function Proyecto() {
 
   useEffect(() => {
     obtenerProyecto(params.id);
-  }, []);
+  }, [params.id]);
 
   useEffect(() => {
     socket = io(import.meta.env.VITE_BACKEND_URL);
     socket.emit("abrir proyecto", params.id);
-  }, []);
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [params.id]);
 
   useEffect(() => {
+    if (!socket || !proyecto?._id) return;
+
     socket.on("tarea agregada", (tareaNueva) => {
       if (tareaNueva.proyecto === proyecto._id) {
         submitTareasProyecto(tareaNueva);
@@ -61,19 +65,25 @@ export default function Proyecto() {
         cambiarEstadoTarea(nuevoEstadoTarea);
       }
     });
-  });
+
+    return () => {
+      socket.off("tarea agregada");
+      socket.off("tarea eliminada");
+      socket.off("tarea actualizada");
+      socket.off("nuevo estado");
+    };
+  }, [proyecto?._id]);
 
   const { nombre } = proyecto;
   if (cargando) return "Cargando...";
-  const { msg } = alerta;
 
   return (
     <>
-      <div className="flex justify-between">
-        <h1 className="font-black text-4xl">{nombre}</h1>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <h1 className="font-black text-3xl text-gray-900 md:text-4xl">{nombre}</h1>
 
         {admin && (
-          <div className="flex items-center gap-2 text-gray-400 hover:text-black">
+          <div className="flex items-center gap-2 text-gray-500 hover:text-gray-900">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -90,7 +100,7 @@ export default function Proyecto() {
             </svg>
             <Link
               to={`/proyectos/editar/${params.id}`}
-              className="uppercase font-bold"
+              className="text-sm uppercase font-bold"
             >
               Editar
             </Link>
@@ -102,7 +112,7 @@ export default function Proyecto() {
         <button
           onClick={handleModalTarea}
           type="button"
-          className="text-sm px-5 py-3 w-full md:w-auto rounded-lg uppercase font-bold bg-sky-400 text-white text-center mt-5 flex gap-2 items-center justify-center"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-5 py-3 text-center text-sm font-bold uppercase text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 md:w-auto"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -120,9 +130,18 @@ export default function Proyecto() {
         </button>
       )}
 
-      <p className="font-bold text-xl mt-10">Tareas del Proyecto</p>
+      <div className="mt-10 flex flex-col gap-1 border-b border-gray-200 pb-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xl font-bold text-gray-900">Tareas del Proyecto</p>
+          <p className="text-sm text-gray-500">
+            {proyecto.tareas?.length
+              ? `${proyecto.tareas.length} ${proyecto.tareas.length === 1 ? "tarea registrada" : "tareas registradas"}`
+              : "Organiza el trabajo pendiente de este proyecto"}
+          </p>
+        </div>
+      </div>
 
-      <div className="bg-white shadow mt-10 rounded-lg">
+      <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         {proyecto.tareas?.length ? (
           proyecto.tareas?.map((tarea) => (
             <Tarea key={tarea._id} tarea={tarea} />

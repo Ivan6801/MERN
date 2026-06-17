@@ -1,44 +1,29 @@
-import { Fragment, useState, useEffect } from "react";
-import { Transition } from "@headlessui/react";
+import { Fragment, useState } from "react";
+import { Dialog, DialogPanel, DialogTitle, Transition } from "@headlessui/react";
 import useProyectos from "../../hooks/useProyectos";
 import { Alerta } from "../Alerta";
 import { useParams } from "react-router-dom";
 
 const PRIORIDAD = ["Baja", "Media", "Alta"];
 
-export default function ModalFormularioTarea() {
-  const [id, setId] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [fechaEntrega, setFechaEntrega] = useState("");
-  const [prioridad, setPrioridad] = useState("");
-
-  const params = useParams();
-
-  const {
-    modalFormularioTarea,
-    handleModalTarea,
-    mostrarAlerta,
-    alerta,
-    submitTarea,
-    tarea,
-  } = useProyectos();
-
-  useEffect(() => {
-    if (tarea?._id) {
-      setId(tarea._id);
-      setNombre(tarea.nombre);
-      setDescripcion(tarea.descripcion);
-      setFechaEntrega(tarea.fechaEntrega?.split("T")[0]);
-      setPrioridad(tarea.prioridad);
-      return;
-    }
-    setId("");
-    setNombre("");
-    setDescripcion("");
-    setFechaEntrega("");
-    setPrioridad("");
-  }, [tarea]);
+function ContenidoModalTarea({
+  alerta,
+  handleModalTarea,
+  modalFormularioTarea,
+  mostrarAlerta,
+  params,
+  submitTarea,
+  tareaInicial,
+}) {
+  const [id, setId] = useState(tareaInicial?._id || "");
+  const [nombre, setNombre] = useState(tareaInicial?.nombre || "");
+  const [descripcion, setDescripcion] = useState(
+    tareaInicial?.descripcion || "",
+  );
+  const [fechaEntrega, setFechaEntrega] = useState(
+    tareaInicial?.fechaEntrega?.split("T")[0] || "",
+  );
+  const [prioridad, setPrioridad] = useState(tareaInicial?.prioridad || "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,11 +53,17 @@ export default function ModalFormularioTarea() {
   };
 
   const { msg } = alerta;
+  const titulo = id ? "Editar tarea" : "Nueva tarea";
+  const descripcionModal = id
+    ? "Actualiza los datos clave para mantener el proyecto alineado."
+    : "Define el alcance, fecha y prioridad de la siguiente actividad.";
+  const inputClass =
+    "mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100";
+  const labelClass = "text-sm font-bold uppercase tracking-wide text-gray-700";
 
   return (
     <Transition.Root show={modalFormularioTarea} as={Fragment}>
-      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <Dialog as="div" className="relative z-10" onClose={handleModalTarea}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -82,141 +73,166 @@ export default function ModalFormularioTarea() {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" />
         </Transition.Child>
 
-        {/* This element is to trick the browser into centering the modal contents. */}
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
-          &#8203;
-        </span>
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-6">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <DialogPanel className="relative w-full max-w-2xl transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all">
+                <div className="border-b border-gray-200 px-6 py-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <DialogTitle className="text-2xl font-black text-gray-900">
+                        {titulo}
+                      </DialogTitle>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {descripcionModal}
+                      </p>
+                    </div>
 
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-          enterTo="opacity-100 translate-y-0 sm:scale-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-          leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        >
-          <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-            <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
-              <button
-                type="button"
-                className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                onClick={handleModalTarea}
-              >
-                <span className="sr-only">Cerrar</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                <div
-                  className="text-lg leading-6 font-bold text-gray-900"
-                >
-                  {id ? "Editar Tarea" : "Crear Tarea"}
+                    <button
+                      type="button"
+                      className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      onClick={handleModalTarea}
+                    >
+                      <span className="sr-only">Cerrar</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                {msg && <Alerta alerta={alerta} />}
+                <form onSubmit={handleSubmit}>
+                  <div className="space-y-5 px-6 py-6">
+                    {msg && <Alerta alerta={alerta} />}
 
-                <form onSubmit={handleSubmit} className="my-10">
-                  <div className="mb-5">
-                    <label
-                      className="text-gray-700 uppercase font-bold text-sm"
-                      htmlFor="nombre"
-                    >
-                      Nombre Tarea
-                    </label>
-                    <input
-                      type="text"
-                      id="nombre"
-                      placeholder="Nombre de la Tarea"
-                      className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                      value={nombre}
-                      onChange={(e) => setNombre(e.target.value)}
-                    />
+                    <div>
+                      <label className={labelClass} htmlFor="nombre">
+                        Nombre
+                      </label>
+                      <input
+                        type="text"
+                        id="nombre"
+                        placeholder="Ej. Preparar propuesta comercial"
+                        className={inputClass}
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass} htmlFor="descripcion">
+                        Descripción
+                      </label>
+                      <textarea
+                        id="descripcion"
+                        placeholder="Describe el resultado esperado y cualquier detalle relevante"
+                        className={`${inputClass} min-h-32 resize-y`}
+                        value={descripcion}
+                        onChange={(e) => setDescripcion(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="fecha-entrega">
+                          Fecha de entrega
+                        </label>
+                        <input
+                          type="date"
+                          id="fecha-entrega"
+                          className={inputClass}
+                          value={fechaEntrega}
+                          onChange={(e) => setFechaEntrega(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass} htmlFor="prioridad">
+                          Prioridad
+                        </label>
+                        <select
+                          id="prioridad"
+                          className={inputClass}
+                          value={prioridad}
+                          onChange={(e) => setPrioridad(e.target.value)}
+                        >
+                          <option value="">Seleccionar prioridad</option>
+
+                          {PRIORIDAD.map((opcion) => (
+                            <option key={opcion}>{opcion}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mb-5">
-                    <label
-                      className="text-gray-700 uppercase font-bold text-sm"
-                      htmlFor="descripcion"
+                  <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-bold uppercase text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                      onClick={handleModalTarea}
                     >
-                      Descripción Tarea
-                    </label>
-                    <textarea
-                      id="descripcion"
-                      placeholder="Descripción de la Tarea"
-                      className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                      value={descripcion}
-                      onChange={(e) => setDescripcion(e.target.value)}
-                    />
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-bold uppercase text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                    >
+                      {id ? "Guardar cambios" : "Crear tarea"}
+                    </button>
                   </div>
-
-                  <div className="mb-5">
-                    <label
-                      className="text-gray-700 uppercase font-bold text-sm"
-                      htmlFor="fecha-entrega"
-                    >
-                      Fecha Entrega
-                    </label>
-                    <input
-                      type="date"
-                      id="fecha-entrega"
-                      className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                      value={fechaEntrega}
-                      onChange={(e) => setFechaEntrega(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="mb-5">
-                    <label
-                      className="text-gray-700 uppercase font-bold text-sm"
-                      htmlFor="prioridad"
-                    >
-                      Prioridad
-                    </label>
-                    <select
-                      id="prioridad"
-                      className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                      value={prioridad}
-                      onChange={(e) => setPrioridad(e.target.value)}
-                    >
-                      <option value="">-- Seleccionar --</option>
-
-                      {PRIORIDAD.map((opcion) => (
-                        <option key={opcion}>{opcion}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <input
-                    type="submit"
-                    className="bg-sky-600 hover:bg-sky-700 w-full p-3 text-white uppercase font-bold cursor-pointer transition-colors rounded text-sm"
-                    value={id ? "Guardar Cambios" : "Crear Tarea"}
-                  />
                 </form>
-              </div>
-            </div>
+              </DialogPanel>
+            </Transition.Child>
           </div>
-        </Transition.Child>
-      </div>
+        </div>
+      </Dialog>
     </Transition.Root>
+  );
+}
+
+export default function ModalFormularioTarea() {
+  const params = useParams();
+
+  const {
+    modalFormularioTarea,
+    handleModalTarea,
+    mostrarAlerta,
+    alerta,
+    submitTarea,
+    tarea,
+  } = useProyectos();
+
+  return (
+    <ContenidoModalTarea
+      key={tarea?._id || "nueva-tarea"}
+      alerta={alerta}
+      handleModalTarea={handleModalTarea}
+      modalFormularioTarea={modalFormularioTarea}
+      mostrarAlerta={mostrarAlerta}
+      params={params}
+      submitTarea={submitTarea}
+      tareaInicial={tarea}
+    />
   );
 }

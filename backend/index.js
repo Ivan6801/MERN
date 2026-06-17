@@ -6,6 +6,7 @@ import conectarDB from "./config/db.js";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import proyectoRoutes from "./routes/proyectoRoutes.js";
 import tareaRoutes from "./routes/tareaRoutes.js";
+import { Server } from "socket.io";
 
 const app = express();
 app.use(express.json());
@@ -38,4 +39,32 @@ app.use("/api/tareas", tareaRoutes);
 const PORT = process.env.PORT || 4000;
 const servidor = app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
+
+const io = new Server(servidor, {
+  cors: {
+    origin: process.env.FRONTEND_URL,
+  },
+});
+
+io.on("connection", (socket) => {
+  socket.on("abrir proyecto", (proyecto) => {
+    socket.join(proyecto);
+  });
+
+  socket.on("nueva tarea", (tarea) => {
+    socket.to(tarea.proyecto).emit("tarea agregada", tarea);
+  });
+
+  socket.on("eliminar tarea", (tarea) => {
+    socket.to(tarea.proyecto).emit("tarea eliminada", tarea);
+  });
+
+  socket.on("actualizar tarea", (tarea) => {
+    socket.to(tarea.proyecto._id).emit("tarea actualizada", tarea);
+  });
+
+  socket.on("cambiar estado", (tarea) => {
+    socket.to(tarea.proyecto._id).emit("nuevo estado", tarea);
+  });
 });
