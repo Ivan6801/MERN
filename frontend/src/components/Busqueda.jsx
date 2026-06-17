@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Combobox, Dialog, Transition } from "@headlessui/react";
+import { Combobox, Transition } from "@headlessui/react";
 import useProyectos from "../hooks/useProyectos";
 
 function classNames(...classes) {
@@ -14,7 +14,7 @@ export default function Busqueda() {
 
   return (
     <Transition.Root show={buscador} as={Fragment} afterLeave={() => setBusqueda('')}>
-      <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto mt-20 p-4 sm:p-20 md:p-20" onClose={handleBuscador}>
+      <div className="fixed inset-0 z-10 overflow-y-auto mt-20 p-4 sm:p-20 md:p-20" onClose={handleBuscador}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -24,7 +24,7 @@ export default function Busqueda() {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
         </Transition.Child>
 
         <Transition.Child
@@ -64,7 +64,7 @@ export default function Busqueda() {
             )}
           </Combobox>
         </Transition.Child>
-      </Dialog>
+      </div>
     </Transition.Root>
   )
 }
