@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import useProyectos from "../../hooks/useProyectos";
 import useAuth from "../../hooks/useAuth";
 import Busqueda from "../Busqueda";
+import { removeAuthToken } from "../../helpers/authToken";
 
 export default function Header() {
   const { handleBuscador, cerrarSesionProyectos } = useProyectos();
@@ -10,7 +11,7 @@ export default function Header() {
   const handleCerrarSesion = () => {
     cerrarSesionAuth();
     cerrarSesionProyectos();
-    localStorage.removeItem("token");
+    removeAuthToken();
   };
 
   return (

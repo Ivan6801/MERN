@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthLayout from "./layouts/AuthLayout";
-import RutaProtegida from "./layouts/RutaProtegida";
+import ProtectedRoute from "./layouts/ProtectedRoute";
 import Login from "./paginas/Login";
 import Registrar from "./paginas/Registrar";
 import OlvidePassword from "./paginas/OlvidePassword";
@@ -31,7 +31,7 @@ function App() {
               <Route path="confirmar/:id" element={<ConfirmarCuenta />} />
             </Route>
 
-            <Route path="/proyectos" element={<RutaProtegida />}>
+            <Route path="/proyectos" element={<ProtectedRoute />}>
               <Route index element={<Proyectos />} />
               <Route path="crear-proyecto" element={<NuevoProyecto />} />
               <Route

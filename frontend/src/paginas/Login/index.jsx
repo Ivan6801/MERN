@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Alerta } from "../../components/Alerta";
 import clienteAxios from "../../config/clienteAxios";
 import useAuth from "../../hooks/useAuth";
+import { setAuthToken } from "../../helpers/authToken";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,7 +29,7 @@ export default function Login() {
         password,
       });
       setAlerta({});
-      localStorage.setItem("token", data.token);
+      setAuthToken(data.token);
       setAuth(data);
       navigate("/proyectos");
     } catch (error) {
